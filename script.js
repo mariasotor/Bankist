@@ -79,3 +79,17 @@ const displayMovements = function (movements) {
 };
 
 displayMovements(account1.movements);
+
+const createUsername = function (accounts) {
+  accounts.forEach(function (account) {
+    //ForEach good use case since we are not returning anything, no new value is being created. The method is producing a "side effect" - do some work without returning anything
+    account.username = account.owner //looped over the accounts array and manipulated the current account object and added the username property based on the account.owner value+transformations below
+      .toLocaleLowerCase()
+      .split(" ")
+      .map((name) => name[0]) //allow to create a new array
+      .join("");
+  });
+};
+
+createUsername(accounts);
+console.log(accounts);
