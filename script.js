@@ -91,6 +91,29 @@ const calcDisplayBalance = function (movements) {
 
 calcDisplayBalance(account1.movements);
 
+//Calculate summary (income, outcome, interest) value
+
+const calcDisplaySummary = function (movements) {
+  const income = movements
+    .filter((mov) => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
+
+  const outcome = movements
+    .filter((mov) => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+
+  const interest = movements
+    .filter((mov) => mov > 0) //interest rate of 1.2 for each deposit
+    .map((deposit) => deposit * (1.2 / 100))
+    .filter((int) => int >= 1) //only pay interest if the interest is at least 1%
+    .reduce((acc, int) => acc + int);
+
+  labelSumIn.textContent = `${income}€`;
+  labelSumOut.textContent = `${Math.abs(outcome)}€`;
+  labelSumInterest.textContent = `${interest}€`;
+};
+
+calcDisplaySummary(account1.movements);
 //Create username
 const createUsername = function (accounts) {
   accounts.forEach(function (account) {
