@@ -61,6 +61,21 @@ const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 
+//Create username
+const createUsername = function (accounts) {
+  accounts.forEach(function (account) {
+    //ForEach good use case since we are not returning anything, no new value is being created. The method is producing a "side effect" - do some work without returning anything
+    account.username = account.owner //looped over the accounts array and manipulated the current account object and added the username property based on the account.owner value+transformations below
+      .toLocaleLowerCase()
+      .split(" ")
+      .map((name) => name[0]) //allow to create a new array
+      .join("");
+  });
+};
+
+createUsername(accounts);
+console.log(accounts);
+
 //It is better to pass the data that a function needs(as a parameter) inside that function instead of using global variable.
 
 const displayMovements = function (movements) {
@@ -78,33 +93,28 @@ const displayMovements = function (movements) {
   });
 };
 
-displayMovements(account1.movements);
-
 //Calculate balance
 
 const calcDisplayBalance = function (movements) {
   const balance = movements.reduce((acc, mov) => acc + mov, 0);
 
   labelBalance.textContent = `${balance}€`;
-  console.log(balance);
 };
-
-calcDisplayBalance(account1.movements);
 
 //Calculate summary (income, outcome, interest) value
 
-const calcDisplaySummary = function (movements) {
-  const income = movements
+const calcDisplaySummary = function (account) {
+  const income = account.movements
     .filter((mov) => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
 
-  const outcome = movements
+  const outcome = account.movements
     .filter((mov) => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
 
-  const interest = movements
+  const interest = account.movements
     .filter((mov) => mov > 0) //interest rate of 1.2 for each deposit
-    .map((deposit) => deposit * (1.2 / 100))
+    .map((deposit) => deposit * (account.interestRate / 100))
     .filter((int) => int >= 1) //only pay interest if the interest is at least 1%
     .reduce((acc, int) => acc + int);
 
@@ -113,18 +123,31 @@ const calcDisplaySummary = function (movements) {
   labelSumInterest.textContent = `${interest}€`;
 };
 
-calcDisplaySummary(account1.movements);
-//Create username
-const createUsername = function (accounts) {
-  accounts.forEach(function (account) {
-    //ForEach good use case since we are not returning anything, no new value is being created. The method is producing a "side effect" - do some work without returning anything
-    account.username = account.owner //looped over the accounts array and manipulated the current account object and added the username property based on the account.owner value+transformations below
-      .toLocaleLowerCase()
-      .split(" ")
-      .map((name) => name[0]) //allow to create a new array
-      .join("");
-  });
-};
+//login implementation
+let currentAccount;
 
-createUsername(accounts);
-console.log(accounts);
+btnLogin.addEventListener("click", function (event) {
+  //Prevent form from submitting
+  event.preventDefault();
+
+  currentAccount = accounts.find(
+    (acct) => acct.username === inputLoginUsername.value
+  );
+
+  // with the optional chaining the pin property will only be read if the current account exist
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    //Display UI and welcome message
+    labelWelcome.textContent = `Welcome back, ${
+      currentAccount.owner.split(" ")[0]
+    }`;
+    containerApp.style.opacity = 100;
+
+    //clear input field
+    inputLoginPin.value = inputLoginUsername.value = "";
+    inputLoginPin.blur(); //input field looses its focus
+
+    displayMovements(currentAccount.movements);
+    calcDisplayBalance(currentAccount.movements);
+    calcDisplaySummary(currentAccount);
+  }
+});
