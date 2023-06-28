@@ -80,6 +80,18 @@ const displayMovements = function (movements) {
 
 displayMovements(account1.movements);
 
+//Calculate balance
+
+const calcDisplayBalance = function (movements) {
+  const balance = movements.reduce((acc, mov) => acc + mov, 0);
+
+  labelBalance.textContent = `${balance}€`;
+  console.log(balance);
+};
+
+calcDisplayBalance(account1.movements);
+
+//Create username
 const createUsername = function (accounts) {
   accounts.forEach(function (account) {
     //ForEach good use case since we are not returning anything, no new value is being created. The method is producing a "side effect" - do some work without returning anything
