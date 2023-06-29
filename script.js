@@ -182,6 +182,24 @@ btnTransfer.addEventListener("click", function (event) {
   inputTransferAmount.blur();
 });
 
+//Request loan
+
+btnLoan.addEventListener("click", function (event) {
+  event.preventDefault();
+  const loanAmount = Number(inputLoanAmount.value);
+
+  const loanAccess = currentAccount.movements.some(
+    //A loan can only be given if the user has any deposit >= 10% of requested amount
+    (mov) => mov >= loanAmount * 0.1
+  );
+
+  if (loanAmount > 0 && loanAccess) {
+    currentAccount.movements.push(loanAmount);
+    updateUI(currentAccount);
+  }
+  inputLoanAmount.value = "";
+});
+
 // Close account
 btnClose.addEventListener("click", function (event) {
   event.preventDefault();
