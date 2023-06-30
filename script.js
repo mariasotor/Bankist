@@ -78,9 +78,12 @@ console.log(accounts);
 
 //It is better to pass the data that a function needs(as a parameter) inside that function instead of using global variable.
 
-const displayMovements = function (movements) {
+const displayMovements = function (movements, sort = false) {
   containerMovements.innerHTML = ""; //empty container
-  movements.forEach(function (mov, i) {
+
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
+  movs.forEach(function (mov, i) {
     const type = mov > 0 ? "deposit" : "withdrawal";
 
     const html = `
@@ -217,4 +220,13 @@ btnClose.addEventListener("click", function (event) {
     containerApp.style.opacity = 0;
   }
   inputCloseUsername.value = inputClosePin.value = "";
+});
+
+//Sorting movements
+let sorted = false;
+btnSort.addEventListener("click", function (event) {
+  event.preventDefault();
+  displayMovements(currentAccount.movements, !sorted);
+
+  sorted = !sorted;
 });
