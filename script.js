@@ -223,10 +223,10 @@ btnClose.addEventListener("click", function (event) {
 });
 
 //Sorting movements
-let sorted = false;
+let sorted = false; //state variable: keeps track of whether the account.movements are sorted or not
 btnSort.addEventListener("click", function (event) {
   event.preventDefault();
-  displayMovements(currentAccount.movements, !sorted);
+  displayMovements(currentAccount.movements, !sorted); //if sorted is false, !sorted will be true, and vice versa
 
-  sorted = !sorted;
+  sorted = !sorted; //This line toggles the value of the sorted variable. If it was false, it becomes true, and vice versa. This is done to ensure that the next time the button is clicked, the opposite sorting order is applied to the movements.
 });
