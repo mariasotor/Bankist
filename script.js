@@ -101,7 +101,7 @@ const displayMovements = function (movements, sort = false) {
     const html = `
   <div class="movements__row">
     <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
-    <div class="movements__value">${mov} €</div>
+    <div class="movements__value">${mov.toFixed(2)} €</div>
  </div>`;
 
     containerMovements.insertAdjacentHTML("afterbegin", html); //with afterbegin, every new item is added before the previous one. At the beginning of the container
@@ -113,7 +113,7 @@ const displayMovements = function (movements, sort = false) {
 const calcDisplayBalance = function (acct) {
   acct.balance = acct.movements.reduce((acc, mov) => acc + mov, 0);
 
-  labelBalance.textContent = `${acct.balance}€`;
+  labelBalance.textContent = `${acct.balance.toFixed(2)}€`;
 };
 
 //Calculate summary (income, outcome, interest) value
@@ -133,9 +133,9 @@ const calcDisplaySummary = function (account) {
     .filter((int) => int >= 1) //only pay interest if the interest is at least 1%
     .reduce((acc, int) => acc + int);
 
-  labelSumIn.textContent = `${income}€`;
-  labelSumOut.textContent = `${Math.abs(outcome)}€`;
-  labelSumInterest.textContent = `${interest}€`;
+  labelSumIn.textContent = `${income.toFixed(2)}€`;
+  labelSumOut.textContent = `${Math.abs(outcome).toFixed(2)}€`;
+  labelSumInterest.textContent = `${interest.toFixed(2)}€`;
 };
 
 //Update UI
@@ -201,7 +201,7 @@ btnTransfer.addEventListener("click", function (event) {
 
 btnLoan.addEventListener("click", function (event) {
   event.preventDefault();
-  const loanAmount = Number(inputLoanAmount.value);
+  const loanAmount = Math.floor(inputLoanAmount.value);
 
   const loanAccess = currentAccount.movements.some(
     //A loan can only be given if the user has any deposit >= 10% of requested amount
