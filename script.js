@@ -108,6 +108,16 @@ const formatMovementsDates = function (locale, date) {
   // return `${day}/${month}/${year}`;
 };
 
+//Format numbers
+
+const formatMovementsNumbers = function (locale, curr, mov) {
+  const options = {
+    style: "currency",
+    currency: curr,
+  };
+  return new Intl.NumberFormat(locale, options).format(mov);
+};
+
 const displayMovements = function (acct, sort = false) {
   containerMovements.innerHTML = ""; //empty container
 
@@ -119,14 +129,15 @@ const displayMovements = function (acct, sort = false) {
     const type = mov > 0 ? "deposit" : "withdrawal";
     //use the current index to get data from other array
     const date = new Date(acct.movementsDates[i]);
-
     const displayDate = formatMovementsDates(acct.locale, date);
+
+    const displayMov = formatMovementsNumbers(acct.locale, acct.currency, mov);
 
     const html = `
   <div class="movements__row">
     <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
     <div class="movements__date">${displayDate}</div>
-    <div class="movements__value">${mov.toFixed(2)} €</div>
+    <div class="movements__value">${displayMov} </div>
  </div>`;
 
     containerMovements.insertAdjacentHTML("afterbegin", html); //with afterbegin, every new item is added before the previous one. At the beginning of the container
@@ -138,29 +149,49 @@ const displayMovements = function (acct, sort = false) {
 const calcDisplayBalance = function (acct) {
   acct.balance = acct.movements.reduce((acc, mov) => acc + mov, 0);
 
-  labelBalance.textContent = `${acct.balance.toFixed(2)}€`;
+  const displayBal = formatMovementsNumbers(
+    acct.locale,
+    acct.currency,
+    acct.balance
+  );
+
+  labelBalance.textContent = displayBal;
 };
 
 //Calculate summary (income, outcome, interest) value
 
-const calcDisplaySummary = function (account) {
-  const income = account.movements
+const calcDisplaySummary = function (acct) {
+  const income = acct.movements
     .filter((mov) => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
 
-  const outcome = account.movements
+  const displayInc = formatMovementsNumbers(acct.locale, acct.currency, income);
+
+  const outcome = acct.movements
     .filter((mov) => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
 
-  const interest = account.movements
+  const displayOut = formatMovementsNumbers(
+    acct.locale,
+    acct.currency,
+    Math.abs(outcome)
+  );
+
+  const interest = acct.movements
     .filter((mov) => mov > 0) //interest rate of 1.2 for each deposit
-    .map((deposit) => deposit * (account.interestRate / 100))
+    .map((deposit) => deposit * (acct.interestRate / 100))
     .filter((int) => int >= 1) //only pay interest if the interest is at least 1%
     .reduce((acc, int) => acc + int);
 
-  labelSumIn.textContent = `${income.toFixed(2)}€`;
-  labelSumOut.textContent = `${Math.abs(outcome).toFixed(2)}€`;
-  labelSumInterest.textContent = `${interest.toFixed(2)}€`;
+  const displayInt = formatMovementsNumbers(
+    acct.locale,
+    acct.currency,
+    interest
+  );
+
+  labelSumIn.textContent = displayInc;
+  labelSumOut.textContent = displayOut;
+  labelSumInterest.textContent = displayInt;
 };
 
 //Update UI
