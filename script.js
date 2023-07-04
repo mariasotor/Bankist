@@ -90,17 +90,27 @@ console.log(accounts);
 
 //It is better to pass the data that a function needs(as a parameter) inside that function instead of using global variable.
 
-const displayMovements = function (movements, sort = false) {
+const displayMovements = function (acct, sort = false) {
   containerMovements.innerHTML = ""; //empty container
 
-  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+  const movs = sort
+    ? acct.movements.slice().sort((a, b) => a - b)
+    : acct.movements;
 
   movs.forEach(function (mov, i) {
     const type = mov > 0 ? "deposit" : "withdrawal";
+    //use the current index to get data from other array
+    const date = new Date(acct.movementsDates[i]);
+
+    const year = date.getFullYear();
+    const day = `${date.getDate()}`.padStart(2, 0);
+    const month = `${date.getMonth() + 1}`.padStart(2, 0);
+    const displayDate = `${day}/${month}/${year}`;
 
     const html = `
   <div class="movements__row">
     <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
+    <div class="movements__date">${displayDate}</div>
     <div class="movements__value">${mov.toFixed(2)} €</div>
  </div>`;
 
@@ -141,13 +151,20 @@ const calcDisplaySummary = function (account) {
 //Update UI
 
 const updateUI = function (acct) {
-  displayMovements(acct.movements);
+  displayMovements(acct);
   calcDisplayBalance(acct);
   calcDisplaySummary(acct);
 };
 
 //login implementation
 let currentAccount;
+
+//FAKE ALWAYS LOGGED IN
+currentAccount = account1;
+updateUI(currentAccount);
+containerApp.style.opacity = 100;
+
+//Event listeners
 
 btnLogin.addEventListener("click", function (event) {
   //Prevent form from submitting
@@ -164,6 +181,16 @@ btnLogin.addEventListener("click", function (event) {
       currentAccount.owner.split(" ")[0]
     }`;
     containerApp.style.opacity = 100;
+
+    //Create current date and time
+    const now = new Date();
+    const year = now.getFullYear();
+    const day = `${now.getDate()}`.padStart(2, 0);
+    const month = `${now.getMonth() + 1}`.padStart(2, 0);
+    const hour = `${now.getHours()}`.padStart(2, 0);
+    const min = `${now.getMinutes()}`.padStart(2, 0);
+
+    labelDate.textContent = `${day}/${month}/${year}, ${hour}:${min}`;
 
     //clear input field
     inputLoginPin.value = inputLoginUsername.value = "";
@@ -191,6 +218,11 @@ btnTransfer.addEventListener("click", function (event) {
   ) {
     currentAccount.movements.push(-amount);
     transferAccount.movements.push(amount);
+
+    //Add transfer date
+    currentAccount.movementsDates.push(new Date().toISOString);
+    transferAccount.movementsDates.push(new Date().toISOString);
+
     updateUI(currentAccount);
   }
   inputTransferTo.value = inputTransferAmount.value = "";
@@ -210,6 +242,10 @@ btnLoan.addEventListener("click", function (event) {
 
   if (loanAmount > 0 && loanAccess) {
     currentAccount.movements.push(loanAmount);
+
+    //Add loan date
+    currentAccount.movementsDates.push(new Date().toISOString);
+
     updateUI(currentAccount);
   }
   inputLoanAmount.value = "";
@@ -238,7 +274,7 @@ btnClose.addEventListener("click", function (event) {
 let sorted = false; //state variable: keeps track of whether the account.movements are sorted or not
 btnSort.addEventListener("click", function (event) {
   event.preventDefault();
-  displayMovements(currentAccount.movements, !sorted); //if sorted is false, !sorted will be true, and vice versa
+  displayMovements(currentAccount, !sorted); //if sorted is false, !sorted will be true, and vice versa
 
   sorted = !sorted; //This line toggles the value of the sorted variable. If it was false, it becomes true, and vice versa. This is done to ensure that the next time the button is clicked, the opposite sorting order is applied to the movements.
 });
