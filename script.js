@@ -90,7 +90,7 @@ console.log(accounts);
 
 //Format Dates
 
-const formatMovementsDates = function (date) {
+const formatMovementsDates = function (locale, date) {
   const calcDaysPassed = (date1, date2) =>
     Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
 
@@ -99,12 +99,13 @@ const formatMovementsDates = function (date) {
   if (daysPassed === 0) return "Today";
   if (daysPassed === 1) return "Yesterday";
   if (daysPassed <= 7) return `${daysPassed} days ago`;
-  else {
-    const year = date.getFullYear();
-    const day = `${date.getDate()}`.padStart(2, 0);
-    const month = `${date.getMonth() + 1}`.padStart(2, 0);
-    return `${day}/${month}/${year}`;
-  }
+
+  return new Intl.DateTimeFormat(locale).format(date);
+
+  // const year = date.getFullYear();
+  // const day = `${date.getDate()}`.padStart(2, 0);
+  // const month = `${date.getMonth() + 1}`.padStart(2, 0);
+  // return `${day}/${month}/${year}`;
 };
 
 const displayMovements = function (acct, sort = false) {
@@ -119,7 +120,7 @@ const displayMovements = function (acct, sort = false) {
     //use the current index to get data from other array
     const date = new Date(acct.movementsDates[i]);
 
-    const displayDate = formatMovementsDates(date);
+    const displayDate = formatMovementsDates(acct.locale, date);
 
     const html = `
   <div class="movements__row">
@@ -198,13 +199,26 @@ btnLogin.addEventListener("click", function (event) {
 
     //Create current date and time
     const now = new Date();
-    const year = now.getFullYear();
-    const day = `${now.getDate()}`.padStart(2, 0);
-    const month = `${now.getMonth() + 1}`.padStart(2, 0);
-    const hour = `${now.getHours()}`.padStart(2, 0);
-    const min = `${now.getMinutes()}`.padStart(2, 0);
+    //using the internationalization API
+    const options = {
+      hour: "numeric",
+      minute: "numeric",
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+    };
 
-    labelDate.textContent = `${day}/${month}/${year}, ${hour}:${min}`;
+    labelDate.textContent = new Intl.DateTimeFormat(
+      currentAccount.locale,
+      options
+    ).format(now);
+    // const year = now.getFullYear();
+    // const day = `${now.getDate()}`.padStart(2, 0);
+    // const month = `${now.getMonth() + 1}`.padStart(2, 0);
+    // const hour = `${now.getHours()}`.padStart(2, 0);
+    // const min = `${now.getMinutes()}`.padStart(2, 0);
+
+    // labelDate.textContent = `${day}/${month}/${year}, ${hour}:${min}`;
 
     //clear input field
     inputLoginPin.value = inputLoginUsername.value = "";
