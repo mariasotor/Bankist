@@ -202,15 +202,36 @@ const updateUI = function (acct) {
   calcDisplaySummary(acct);
 };
 
+//Log-out timer
+
+const startLogoutTimer = function () {
+  //Set time to 10 minutes
+  let time = 600; //seconds(10*60)
+
+  const tick = function () {
+    const min = `${Math.floor(time / 60)}`.padStart(2, 0);
+    const sec = `${time % 60}`.padStart(2, 0);
+    //In each call,print the remaining time to the UI
+    labelTimer.textContent = `${min}:${sec}`;
+
+    //When 0 seconds, stop timer and log out user
+    if (time === 0) {
+      clearInterval(timer);
+      labelWelcome.textContent = "Log in to get started";
+      containerApp.style.opacity = 0;
+    }
+    //Decrease 1s
+    time--;
+  };
+
+  //Call timer every second
+  tick();
+  const timer = setInterval(tick, 1000);
+  return timer;
+};
+
 //login implementation
-let currentAccount;
-
-//FAKE ALWAYS LOGGED IN
-currentAccount = account1;
-updateUI(currentAccount);
-containerApp.style.opacity = 100;
-
-//Event listeners
+let currentAccount, timer; //Variables that persist between different logins
 
 btnLogin.addEventListener("click", function (event) {
   //Prevent form from submitting
@@ -254,6 +275,9 @@ btnLogin.addEventListener("click", function (event) {
     //clear input field
     inputLoginPin.value = inputLoginUsername.value = "";
     inputLoginPin.blur(); //input field looses its focus
+    //Timer
+    if (timer) clearInterval(timer);
+    timer = startLogoutTimer();
 
     updateUI(currentAccount);
   }
@@ -283,6 +307,10 @@ btnTransfer.addEventListener("click", function (event) {
     transferAccount.movementsDates.push(new Date().toISOString());
 
     updateUI(currentAccount);
+
+    //Reset the timer
+    clearInterval(timer);
+    timer = startLogoutTimer();
   }
   inputTransferTo.value = inputTransferAmount.value = "";
   inputTransferAmount.blur();
@@ -304,7 +332,12 @@ btnLoan.addEventListener("click", function (event) {
 
     //Add loan date
     currentAccount.movementsDates.push(new Date().toISOString());
+
+    //Delay in loan "approval"
     setTimeout(() => updateUI(currentAccount), 3000);
+    //Reset the timer
+    clearInterval(timer);
+    timer = startLogoutTimer();
   }
   inputLoanAmount.value = "";
 });
